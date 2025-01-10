@@ -1,5 +1,13 @@
 import pyautogui
 from pynput import keyboard
+# Need pygetwindow to check if active app == masterduel.exe 
+# def check_if_master_duel():
+#     active_window = gw.getActiveWindow()
+#     if active_window and "Master Duel" in active_window.title:
+#         return True
+#     return False
+
+
 
 class ScreenElement:
     def __init__(self, key, x, y):
@@ -20,11 +28,11 @@ def on_exit_hotkey():
 
 
 def for_canonical(f):
-    return lambda k: f(l.canonical(k)) # Jsp mais c'est pour les hotkeys. Voir https://pynput.readthedocs.io/en/latest/keyboard.html#global-hotkeys
+    return lambda k: f(l.canonical(k)) # Jsp mais c'est pour les hotkeys. Voir https:#pynput.readthedocs.io/en/latest/keyboard.html#global-hotkeys
 
 
 def on_press(key):
-    # print(key) # devtool to check keynames
+    print(key) # devtool to check keynames
     
     global paused, exiting_asked # indique que la variable paused utilisée est celle définie dans le global, sinon il faudrait la passer en paramètre à la fonction
     
@@ -44,11 +52,27 @@ def on_press(key):
             or (hasattr(key, 'vk') and key.vk == screen_element.key) # pour les numpad
         ):
             if key not in pressed_keys:
-                # print(key, "\t" , screen_element_name) // devtool
+                # print(key, "\t" , screen_element_name) # devtool
                 pressed_keys.add(key)
                 mouse_curr_x, mouse_curr_y = pyautogui.position()
                 pyautogui.click(screen_element.x, screen_element.y)
                 pyautogui.moveTo(mouse_curr_x, mouse_curr_y)
+    
+    # Gestion actions deck
+    for card_list_action_dictkey, card_list_action_value in card_list_actions.items() :
+        if key == card_list_action_value["key"] and (key not in pressed_keys):
+            pressed_keys.add(key)
+            print(key, "\t" , card_list_action_dictkey) # devtool
+            if card_list_action_value["action"] == "move" :
+                mouse_curr_x, mouse_curr_y = pyautogui.position()
+                new_x = mouse_curr_x + card_list_action_value["add_x"]
+                new_y = mouse_curr_y + card_list_action_value["add_y"]
+                pyautogui.click(new_x, new_y)
+            elif card_list_action_value["action"] == "move" :
+                mouse_curr_x, mouse_curr_y = pyautogui.position()
+                new_x = mouse_curr_x + card_list_action_value["add_x"]
+                new_y = mouse_curr_y + card_list_action_value["add_y"]
+                pyautogui.click(new_x, new_y)
 
 def on_release(key):
     # Lorsque la touche est relâchée, on la retire du set
@@ -72,6 +96,41 @@ screen_elements = {
     "previous_arrow": ScreenElement("q", 80, 540), # q
     "next_arrow": ScreenElement("d", 1840, 540), # d
 }
+# actions = {
+    # reformat actions to gather all actions
+# }
+card_list_actions = {
+    "card_list_up" : {
+        "action" : "move",
+        "key" : keyboard.Key.up,
+        "add_x" : 0,
+        "add_y" : -145
+    },
+    "card_list_down" : {
+        "action" : "move",
+        "key" : keyboard.Key.down,
+        "add_x" : 0,
+        "add_y" : 145
+    },
+    "card_list_left" : {
+        "action" : "move",
+        "key" : keyboard.Key.left,
+        "add_x" : -90,
+        "add_y" : 0
+    },
+    "card_list_right" : {
+        "action" : "move",
+        "key" : keyboard.Key.right,
+        "add_x" : 90,
+        "add_y" : 0
+    },
+    "card_list_add_to_favorite" : {
+        "action" : "click",
+        "key" : "!",
+        "add_x" : 90,
+        "add_y" : 0
+    },
+}
 hotkeys = [
     keyboard.HotKey(
         keyboard.HotKey.parse('<shift>+<alt>+s'), # toggle pause hotkey
@@ -87,15 +146,24 @@ exiting_asked = False
 if __name__ == "__main__":
     print("- Hotkeys for Master Duel -\n")
     print(
-        "s : Phase switcher\n"+
-        "a : Battle phase\n"+
-        "z : Main phase 2\n"+
-        "e : End phase\n"+
-        "q : Previous arrow\n"+
-        "d : Next arrow\n"+
-        "space : Show card infos\n"+
-        "shift+s : Pause\n"+
-        "shift+q : Exit\n")
+        "Script :\n"
+        "shift+s\t : Pause script\n"
+        "shift+q\t : Exit script\n"
+        "\n"
+        "General :\n"
+        "space\t : Show card infos (general)\n"
+        "q\t : Previous arrow (general)\n"
+        "d\t : Next arrow (general)\n"
+        "\n"
+        "Deck :\n"
+        "arrow keys : Navigate card list (deck)\n"
+        "!\t : Add card to favorites (deck)\n"
+        "\n"
+        "Battle :\n"
+        "s\t : Phase switcher (battle)\n"
+        "a\t : Battle phase (battle)\n"
+        "z\t : Main phase 2 (battle)\n"
+        "e\t : End phase (battle)\n")
     
     with keyboard.Listener(
         on_press=on_press,
