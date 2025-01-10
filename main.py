@@ -74,7 +74,7 @@ screen_elements = {
 }
 hotkeys = [
     keyboard.HotKey(
-        keyboard.HotKey.parse('<shift>+<alt>+d'), # toggle pause hotkey
+        keyboard.HotKey.parse('<shift>+<alt>+s'), # toggle pause hotkey
         on_toggle_pause_hotkey),
     keyboard.HotKey(
         keyboard.HotKey.parse('<shift>+<alt>+q'), # exit hotkey
