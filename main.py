@@ -64,13 +64,13 @@ def on_release(key):
 # keyboard.Key : .space .backspace
 # key.vk : 96 à 105 pour numpad 0 à 9; 110 pour numpad.
 screen_elements = {
-    "card_info": ScreenElement("a", 110, 320), # a
-    "phase_switcher": ScreenElement("&", 1480, 480), # 1
-    "battle_phase": ScreenElement("é", 1070, 780), # 2
-    "main_phase2": ScreenElement("\"", 1290, 780), # 3
-    "end_phase": ScreenElement("'", 1510, 780), # 4
-    "next_arrow": ScreenElement("d", 1840, 540), # d
+    "card_info": ScreenElement(keyboard.Key.space, 110, 320), # a
+    "phase_switcher": ScreenElement("s", 1480, 480), # 1
+    "battle_phase": ScreenElement("a", 1070, 780), # 2
+    "main_phase2": ScreenElement("z", 1290, 780), # 3
+    "end_phase": ScreenElement("e", 1510, 780), # 4
     "previous_arrow": ScreenElement("q", 80, 540), # q
+    "next_arrow": ScreenElement("d", 1840, 540), # d
 }
 hotkeys = [
     keyboard.HotKey(
