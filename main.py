@@ -9,12 +9,14 @@ class ScreenElement:
 
 
 def on_toggle_pause_hotkey():
+    global paused
     paused = not paused
     print("paused :", paused)
 
 def on_exit_hotkey():
     print("Goodbye.")
-    # return False
+    global exiting_asked
+    exiting_asked = True
 
 
 def for_canonical(f):
@@ -24,12 +26,30 @@ def for_canonical(f):
 def on_press(key):
     # print(key) # devtool to check keynames
     
-    global paused # indique que la variable paused utilisée est celle définie dans le global, sinon il faudrait la passer en paramètre à la fonction
+    global paused, exiting_asked # indique que la variable paused utilisée est celle définie dans le global, sinon il faudrait la passer en paramètre à la fonction
     
     # Gestion des hotkeys
     for hotkey in hotkeys :
         for_canonical(hotkey.press)(key)
+
+    if exiting_asked :
+        return False
+    if paused:
+        return
     
+    # Gestion click on key press
+    for screen_element_name, screen_element in screen_elements.items():
+        if (key == screen_element.key # pour les keys spéciales comme backspace
+            or (hasattr(key, 'char') and key.char == screen_element.key) # pour les lettres et chiffres en str
+            or (hasattr(key, 'vk') and key.vk == screen_element.key) # pour les numpad
+        ):
+            if key not in pressed_keys:
+                print(key, "\t" , screen_element_name)
+                pressed_keys.add(key)
+                mouse_curr_x, mouse_curr_y = pyautogui.position()
+                pyautogui.click(screen_element.x, screen_element.y)
+                pyautogui.moveTo(mouse_curr_x, mouse_curr_y)
+
 def on_release(key):
     # Lorsque la touche est relâchée, on la retire du set
     if key in pressed_keys:
@@ -37,7 +57,6 @@ def on_release(key):
 
     for hotkey in hotkeys :
         for_canonical(hotkey.release)(key)
-
 
 
 # Keyboard inputs :
@@ -63,7 +82,7 @@ hotkeys = [
 ]
 pressed_keys = set() # collection d'élément uniques non organisés
 paused = False
-
+exiting_asked = False
 
 if __name__ == "__main__":
     print("- Hotkeys for Master Duel -")
