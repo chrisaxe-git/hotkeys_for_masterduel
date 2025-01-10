@@ -44,7 +44,7 @@ def on_press(key):
             or (hasattr(key, 'vk') and key.vk == screen_element.key) # pour les numpad
         ):
             if key not in pressed_keys:
-                print(key, "\t" , screen_element_name)
+                # print(key, "\t" , screen_element_name) // devtool
                 pressed_keys.add(key)
                 mouse_curr_x, mouse_curr_y = pyautogui.position()
                 pyautogui.click(screen_element.x, screen_element.y)
