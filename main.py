@@ -87,15 +87,15 @@ exiting_asked = False
 if __name__ == "__main__":
     print("- Hotkeys for Master Duel -\n")
     print(
-        "\ts : Switch phase\n"+
-        "\ta : Battle phase\n"+
-        "\tz : Main phase 2\n"+
-        "\te : End phase\n"+
-        "\tspace : Show card infos\n"+
-        "\tq : Previous arrow\n"+
-        "\td : Next arrow\n"+
-        "\tshift+s : Pause\n"+
-        "\tshift+q : Exit\n")
+        "s : Phase switcher\n"+
+        "a : Battle phase\n"+
+        "z : Main phase 2\n"+
+        "e : End phase\n"+
+        "q : Previous arrow\n"+
+        "d : Next arrow\n"+
+        "space : Show card infos\n"+
+        "shift+s : Pause\n"+
+        "shift+q : Exit\n")
     
     with keyboard.Listener(
         on_press=on_press,
