@@ -1,6 +1,6 @@
 import pyautogui
 from pynput import keyboard
-
+import pygetwindow as gw
 
 
 class ScreenElement:
@@ -15,13 +15,17 @@ def on_press(key):
     
     global paused, exiting_asked # indique que la variable paused utilisée est celle définie dans le global, sinon il faudrait la passer en paramètre à la fonction
     
-    # Multi_hotkeys handling
-    for hotkey in multi_hotkeys :
-        for_canonical(hotkey.press)(key)
-
+    # global_multi_hotkeys handling
+    for global_multi_hotkey in global_multi_hotkeys :
+        for_canonical(global_multi_hotkey.press)(key)
     if exiting_asked :
         return False
     if paused:
+        return
+
+    # Limit non-global hotkeys only to masterduel
+    active_window = gw.getActiveWindow()
+    if not (active_window.title == "masterduel") :
         return
     
     # Hotkeys handling
@@ -57,8 +61,8 @@ def on_release(key):
     if key in pressed_keys:
         pressed_keys.remove(key)
 
-    for hotkey in multi_hotkeys :
-        for_canonical(hotkey.release)(key)
+    for global_multi_hotkey in global_multi_hotkeys :
+        for_canonical(global_multi_hotkey.release)(key)
 
 def on_toggle_pause_hotkey():
     global paused
@@ -155,12 +159,12 @@ hotkeys = {
         "y" : 780,
     },
 }
-multi_hotkeys = [
+global_multi_hotkeys = [ # Global hotkeys can be used outside of masterduel too
     keyboard.HotKey(
-        keyboard.HotKey.parse('<shift>+<alt>+s'), # toggle pause hotkey
+        keyboard.HotKey.parse('<shift>+<alt>+s'), # toggle pause
         on_toggle_pause_hotkey),
     keyboard.HotKey(
-        keyboard.HotKey.parse('<shift>+<alt>+q'), # exit hotkey
+        keyboard.HotKey.parse('<shift>+<alt>+q'), # exit
         on_exit_hotkey),
 ]
 
@@ -170,7 +174,7 @@ exiting_asked = False
 
 
 if __name__ == "__main__":
-    print("- Hotkeys for Master Duel (v0.2.1) -\n")
+    print("- Hotkeys for Master Duel (v0.2.2) -\n")
     print(
         "General :\n"
         "space : Show card infos (general)\n"
