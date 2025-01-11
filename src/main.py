@@ -1,11 +1,5 @@
 import pyautogui
 from pynput import keyboard
-# Need pygetwindow to check if active app == masterduel.exe 
-# def check_if_master_duel():
-#     active_window = gw.getActiveWindow()
-#     if active_window and "Master Duel" in active_window.title:
-#         return True
-#     return False
 
 
 
@@ -15,6 +9,56 @@ class ScreenElement:
         self.x = x
         self.y = y
 
+
+def on_press(key):
+    # print(key) # devtool-off to check keynames
+    
+    global paused, exiting_asked # indique que la variable paused utilisée est celle définie dans le global, sinon il faudrait la passer en paramètre à la fonction
+    
+    # Multi_hotkeys handling
+    for hotkey in multi_hotkeys :
+        for_canonical(hotkey.press)(key)
+
+    if exiting_asked :
+        return False
+    if paused:
+        return
+    
+    # Hotkeys handling
+    for hotkey_dictkey, hotkey_value in hotkeys.items() :
+        if (key == hotkey_value["key"] # pour les keys spéciales comme backspace
+            or (hasattr(key, 'char') and key.char == hotkey_value["key"]) # pour les lettres et chiffres en str
+            or (hasattr(key, 'vk') and key.vk == hotkey_value["key"]) # pour les virtual key codes (vk)
+        ):
+            if key not in pressed_keys:
+                pressed_keys.add(key)
+                
+                match hotkey_value["action"] :
+                    case "absolute_click" :
+                        # print(key, "\t" , hotkey_dictkey) # devtool-off
+                        
+                        mouse_curr_x, mouse_curr_y = pyautogui.position()
+                        pyautogui.click(hotkey_value["x"], hotkey_value["y"])
+                        pyautogui.moveTo(mouse_curr_x, mouse_curr_y)
+                        
+                    case "relative_click" :
+                        # print(key, "\t" , hotkey_dictkey) # devtool-off
+                        
+                        mouse_curr_x, mouse_curr_y = pyautogui.position()
+                        new_x = mouse_curr_x + hotkey_value["x_offset"]
+                        new_y = mouse_curr_y + hotkey_value["y_offset"]
+                        pyautogui.click(new_x, new_y)
+                        
+                    case _ :
+                        pass
+
+def on_release(key):
+    # Lorsque la touche est relâchée, on la retire du set
+    if key in pressed_keys:
+        pressed_keys.remove(key)
+
+    for hotkey in multi_hotkeys :
+        for_canonical(hotkey.release)(key)
 
 def on_toggle_pause_hotkey():
     global paused
@@ -26,112 +70,92 @@ def on_exit_hotkey():
     global exiting_asked
     exiting_asked = True
 
-
 def for_canonical(f):
-    return lambda k: f(l.canonical(k)) # Jsp mais c'est pour les hotkeys. Voir https:#pynput.readthedocs.io/en/latest/keyboard.html#global-hotkeys
+    return lambda k: f(l.canonical(k)) # Jsp mais c'est pour les multi_hotkeys. Voir https://pynput.readthedocs.io/en/latest/keyboard.html#global-hotkeys
 
 
-def on_press(key):
-    print(key) # devtool to check keynames
+# Keyboard inputs : "é"; keyboard.Key.backspace; key.vk : 96 à 105 pour numpad 0 à 9; 110 pour numpad.
+hotkeys = {
+    # general
+    "card_info": {
+        "action" : "absolute_click",
+        "key" : keyboard.Key.space,
+        "x" : 110,
+        "y" : 320,
+    },
+    "previous_arrow": {
+        "action" : "absolute_click",
+        "key" : "q",
+        "x" : 80,
+        "y" : 540,
+    },
+    "next_arrow": {
+        "action" : "absolute_click",
+        "key" : "d",
+        "x" : 1840,
+        "y" : 540,
+    },
+
+    # battle
+    "phase_switcher": {
+        "action" : "absolute_click",
+        "key" : "s",
+        "x" : 1480,
+        "y" : 480,
+    },
+    "battle_phase": {
+        "action" : "absolute_click",
+        "key" : "a",
+        "x" : 1070,
+        "y" : 780,
+    },
+    "main_phase2": {
+        "action" : "absolute_click",
+        "key" : "z",
+        "x" : 1290,
+        "y" : 780,
+    },
+    "end_phase": {
+        "action" : "absolute_click",
+        "key" : "e",
+        "x" : 1510,
+        "y" : 780,
+    },
     
-    global paused, exiting_asked # indique que la variable paused utilisée est celle définie dans le global, sinon il faudrait la passer en paramètre à la fonction
-    
-    # Gestion des hotkeys
-    for hotkey in hotkeys :
-        for_canonical(hotkey.press)(key)
-
-    if exiting_asked :
-        return False
-    if paused:
-        return
-    
-    # Gestion click on key press
-    for screen_element_name, screen_element in screen_elements.items():
-        if (key == screen_element.key # pour les keys spéciales comme backspace
-            or (hasattr(key, 'char') and key.char == screen_element.key) # pour les lettres et chiffres en str
-            or (hasattr(key, 'vk') and key.vk == screen_element.key) # pour les numpad
-        ):
-            if key not in pressed_keys:
-                # print(key, "\t" , screen_element_name) # devtool
-                pressed_keys.add(key)
-                mouse_curr_x, mouse_curr_y = pyautogui.position()
-                pyautogui.click(screen_element.x, screen_element.y)
-                pyautogui.moveTo(mouse_curr_x, mouse_curr_y)
-    
-    # Gestion actions deck
-    for card_list_action_dictkey, card_list_action_value in card_list_actions.items() :
-        if key == card_list_action_value["key"] and (key not in pressed_keys):
-            pressed_keys.add(key)
-            print(key, "\t" , card_list_action_dictkey) # devtool
-            if card_list_action_value["action"] == "move" :
-                mouse_curr_x, mouse_curr_y = pyautogui.position()
-                new_x = mouse_curr_x + card_list_action_value["add_x"]
-                new_y = mouse_curr_y + card_list_action_value["add_y"]
-                pyautogui.click(new_x, new_y)
-            elif card_list_action_value["action"] == "move" :
-                mouse_curr_x, mouse_curr_y = pyautogui.position()
-                new_x = mouse_curr_x + card_list_action_value["add_x"]
-                new_y = mouse_curr_y + card_list_action_value["add_y"]
-                pyautogui.click(new_x, new_y)
-
-def on_release(key):
-    # Lorsque la touche est relâchée, on la retire du set
-    if key in pressed_keys:
-        pressed_keys.remove(key)
-
-    for hotkey in hotkeys :
-        for_canonical(hotkey.release)(key)
-
-
-# Keyboard inputs :
-# plain letters : "é"
-# keyboard.Key : .space .backspace
-# key.vk : 96 à 105 pour numpad 0 à 9; 110 pour numpad.
-screen_elements = {
-    "card_info": ScreenElement(keyboard.Key.space, 110, 320), # a
-    "phase_switcher": ScreenElement("s", 1480, 480), # 1
-    "battle_phase": ScreenElement("a", 1070, 780), # 2
-    "main_phase2": ScreenElement("z", 1290, 780), # 3
-    "end_phase": ScreenElement("e", 1510, 780), # 4
-    "previous_arrow": ScreenElement("q", 80, 540), # q
-    "next_arrow": ScreenElement("d", 1840, 540), # d
-}
-# actions = {
-    # reformat actions to gather all actions
-# }
-card_list_actions = {
+    # deck
     "card_list_up" : {
-        "action" : "move",
+        "action" : "relative_click",
         "key" : keyboard.Key.up,
-        "add_x" : 0,
-        "add_y" : -145
+        "x_offset" : 0,
+        "y_offset" : -145,
     },
     "card_list_down" : {
-        "action" : "move",
+        "action" : "relative_click",
         "key" : keyboard.Key.down,
-        "add_x" : 0,
-        "add_y" : 145
+        "x_offset" : 0,
+        "y_offset" : 145,
     },
     "card_list_left" : {
-        "action" : "move",
+        "action" : "relative_click",
         "key" : keyboard.Key.left,
-        "add_x" : -90,
-        "add_y" : 0
+        "x_offset" : -90,
+        "y_offset" : 0,
     },
     "card_list_right" : {
-        "action" : "move",
+        "action" : "relative_click",
         "key" : keyboard.Key.right,
-        "add_x" : 90,
-        "add_y" : 0
+        "x_offset" : 90,
+        "y_offset" : 0,
     },
-    "card_list_add_to_favorite" : {
-        "action" : "click",
+    "toggle_card_bookmark" : {
+        "action" : "pass", # devtool-on Pas encore fait
+        # "action" : "absolute_click",
         "key" : "!",
-        "add_x" : 90,
-        "add_y" : 0
+        "x" : 1510,
+        "y" : 780,
     },
 }
-hotkeys = [
+multi_hotkeys = [
     keyboard.HotKey(
         keyboard.HotKey.parse('<shift>+<alt>+s'), # toggle pause hotkey
         on_toggle_pause_hotkey),
@@ -139,31 +163,34 @@ hotkeys = [
         keyboard.HotKey.parse('<shift>+<alt>+q'), # exit hotkey
         on_exit_hotkey),
 ]
+
 pressed_keys = set() # collection d'élément uniques non organisés
 paused = False
 exiting_asked = False
 
+
 if __name__ == "__main__":
-    print("- Hotkeys for Master Duel -\n")
+    print("- Hotkeys for Master Duel (v0.2.1) -\n")
     print(
-        "Script :\n"
-        "shift+s\t : Pause script\n"
-        "shift+q\t : Exit script\n"
-        "\n"
         "General :\n"
-        "space\t : Show card infos (general)\n"
-        "q\t : Previous arrow (general)\n"
-        "d\t : Next arrow (general)\n"
+        "space : Show card infos (general)\n"
+        "q : Previous arrow (general)\n"
+        "d : Next arrow (general)\n"
         "\n"
         "Deck :\n"
         "arrow keys : Navigate card list (deck)\n"
-        "!\t : Add card to favorites (deck)\n"
+        # "! : Toggle card bookmark (deck)\n" # Pas encore prêt
         "\n"
         "Battle :\n"
-        "s\t : Phase switcher (battle)\n"
-        "a\t : Battle phase (battle)\n"
-        "z\t : Main phase 2 (battle)\n"
-        "e\t : End phase (battle)\n")
+        "s : Phase switcher (battle)\n"
+        "a : Battle phase (battle)\n"
+        "z : Main phase 2 (battle)\n"
+        "e : End phase (battle)\n"
+        "\n"
+        "Script :\n"
+        "shift+alt+s : Pause script\n"
+        "shift+alt+q : Exit script\n"
+    )
     
     with keyboard.Listener(
         on_press=on_press,
