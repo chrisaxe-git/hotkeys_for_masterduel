@@ -24,7 +24,7 @@ def on_press(key):
         return
 
     # Limit non-global hotkeys only to masterduel
-    active_window = gw.getActiveWindow()
+    active_window = gw.getActiveWindow() # devtool-off to try on screenshots
     if not (active_window.title == "masterduel") :
         return
     
@@ -55,6 +55,7 @@ def on_press(key):
                         
                     case _ :
                         pass
+            break
 
 def on_release(key):
     # Lorsque la touche est relâchée, on la retire du set
@@ -67,10 +68,10 @@ def on_release(key):
 def on_toggle_pause_hotkey():
     global paused
     paused = not paused
-    print("paused :", paused)
+    print("Script on pause" if paused else "Script resumed")
 
 def on_exit_hotkey():
-    print("Goodbye.")
+    print("\nGoodbye.")
     global exiting_asked
     exiting_asked = True
 
@@ -81,19 +82,19 @@ def for_canonical(f):
 # Keyboard inputs : "é"; keyboard.Key.backspace; key.vk : 96 à 105 pour numpad 0 à 9; 110 pour numpad.
 hotkeys = {
     # general
-    "card_info": {
+    "Show card infos": {
         "action" : "absolute_click",
         "key" : keyboard.Key.space,
         "x" : 110,
         "y" : 320,
     },
-    "previous_arrow": {
+    "Previous arrow": {
         "action" : "absolute_click",
         "key" : "q",
         "x" : 80,
         "y" : 540,
     },
-    "next_arrow": {
+    "Next arrow": {
         "action" : "absolute_click",
         "key" : "d",
         "x" : 1840,
@@ -127,36 +128,47 @@ hotkeys = {
     },
     
     # deck
-    "card_list_up" : {
+    "Navigate card list up" : {
         "action" : "relative_click",
         "key" : keyboard.Key.up,
         "x_offset" : 0,
         "y_offset" : -145,
     },
-    "card_list_down" : {
+    "Navigate card list down" : {
         "action" : "relative_click",
         "key" : keyboard.Key.down,
         "x_offset" : 0,
         "y_offset" : 145,
     },
-    "card_list_left" : {
+    "Navigate card list left" : {
         "action" : "relative_click",
         "key" : keyboard.Key.left,
         "x_offset" : -90,
         "y_offset" : 0,
     },
-    "card_list_right" : {
+    "Navigate card list right" : {
         "action" : "relative_click",
         "key" : keyboard.Key.right,
         "x_offset" : 90,
         "y_offset" : 0,
     },
-    "toggle_card_bookmark" : {
-        "action" : "pass", # devtool-on Pas encore fait
-        # "action" : "absolute_click",
+    "Toggle card bookmark" : {
+        "action" : "absolute_click",
+        "key" : "<",
+        "x" : 100,
+        "y" : 870,
+    },
+    "Add card to deck" : {
+        "action" : "absolute_click",
         "key" : "!",
-        "x" : 1510,
-        "y" : 780,
+        "x" : 160,
+        "y" : 790,
+    },
+    "Remove card from deck" : {
+        "action" : "absolute_click",
+        "key" : ":",
+        "x" : 360,
+        "y" : 790,
     },
 }
 global_multi_hotkeys = [ # Global hotkeys can be used outside of masterduel too
@@ -174,22 +186,24 @@ exiting_asked = False
 
 
 if __name__ == "__main__":
-    print("- Hotkeys for Master Duel (v0.2.2) -\n")
+    print("- Hotkeys for Master Duel (v0.2.3) -\n")
     print(
         "General :\n"
-        "space : Show card infos (general)\n"
-        "q : Previous arrow (general)\n"
-        "d : Next arrow (general)\n"
+        "space : Show card infos\n"
+        "q : Previous arrow\n"
+        "d : Next arrow\n"
         "\n"
         "Deck :\n"
-        "arrow keys : Navigate card list (deck)\n"
-        # "! : Toggle card bookmark (deck)\n" # Pas encore prêt
+        "arrow keys : Navigate card list\n"
+        "< : Toggle card bookmark\n"
+        "! : Add card to deck\n"
+        ": : Remove card from deck\n"
         "\n"
         "Battle :\n"
-        "s : Phase switcher (battle)\n"
-        "a : Battle phase (battle)\n"
-        "z : Main phase 2 (battle)\n"
-        "e : End phase (battle)\n"
+        "s : Phase switcher\n"
+        "a : Battle phase\n"
+        "z : Main phase 2\n"
+        "e : End phase\n"
         "\n"
         "Script :\n"
         "shift+alt+s : Pause script\n"

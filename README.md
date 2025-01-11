@@ -1,4 +1,4 @@
-# Hotkeys for master duel (v0.2.2)
+# Hotkeys for master duel (v0.2.3)
 
 (Script for master duel)<br>
 Provides hotkeys to easily reach often used UI elements.
@@ -14,7 +14,10 @@ d : Next arrow
 
 Deck :
 arrow keys : Navigate card list
-<!-- ! : Toggle card bookmark --> <!-- Pas encore prêt -->
+< : Toggle card bookmark
+! : Add card to deck
+: : Remove card from deck
+
 Battle :
 s : Phase switcher
 a : Battle phase
@@ -30,4 +33,4 @@ Hotkeys are limited only to the masterduel app (except for global hotkeys)
 <br>
 <br>
 ## Features to come :
-- Add more deck hotkeys
+- Custom hotkeys
