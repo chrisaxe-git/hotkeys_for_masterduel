@@ -3,7 +3,8 @@
 (Script for master duel)<br>
 Provides hotkeys to easily reach often used UI elements.
 Makes up for the lack of keyboard support from the app.
-
+<br>
+<br>
 ## Hotkeys :
 <pre>
 General :
@@ -26,6 +27,7 @@ shift+alt+q : Exit script (global)
 </pre>
 
 Hotkeys are limited only to the masterduel app (except for global hotkeys)
-
+<br>
+<br>
 ## Features to come :
 - Add more deck hotkeys
